@@ -3,7 +3,7 @@ package com.example.android.inventoryapp.data;
 public class ProductContract {
   
   private ProductContract() {}
-  public static final class ProductContract implements BaseColumns {
+  public static final class ProductEntry implements BaseColumns {
   
     public final static String TABLE_NAME = "products"
     public final static String _ID = BaseColumns._ID;
