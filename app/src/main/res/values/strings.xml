@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name">InventoryApp</string>
+	<string name="app_name">Warehouse Inventory App</string>
 	<string name="action_settings">Settings</string>
 
 	<!-- actions -->
