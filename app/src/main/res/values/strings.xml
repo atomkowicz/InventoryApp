@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name">Warehouse Inventory App</string>
+	<string name="app_name">Inventory</string>
 	<string name="action_settings">Settings</string>
 
 	<!-- actions -->
@@ -13,17 +13,22 @@
 	<string name="details">Details</string>
 	<string name="quantity">Quantity</string>
 	<string name="price">Price</string>
+	<string name="choose_image">Choose image</string>
 
 	<!-- hints for text edits -->
 	<string name="hint_name">Name</string>
 	<string name="hint_picture">Picture</string>
 	<string name="hint_price">0.00</string>
+	<string name="hint_quantity">0</string>
 	<string name="unknown_price">unknown</string>
-	<string name="currency">PLN</string>
+	<string name="currency">EUR</string>
 
 	<!-- actions results -->
 	<string name="editor_insert_new_successful">Product saved</string>
-	<string name="editor_insert_new_failed">Error when saving product</string>
+	<string name="editor_edit_successful">Product edited and saved</string>
+	<string name="editor_insert_failed">Error when saving product</string>
+	<string name="catalog_update_successful">Product updated</string>
+	<string name="catalog_update_failed">Error when updating product</string>
 
 	<!-- dialogs -->
 	<string name="empty_view_title_text">Warehouse is currently empty</string>

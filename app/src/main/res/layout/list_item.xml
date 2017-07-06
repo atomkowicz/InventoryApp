@@ -3,22 +3,67 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:orientation="vertical"
+	android:orientation="horizontal"
 	android:padding="@dimen/activity_margin">
 
-	<TextView
-		android:id="@+id/name"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:fontFamily="sans-serif-medium"
-		android:textAppearance="?android:textAppearanceMedium"
-		android:textColor="#2B3D4D"  />
+	<ImageView
+		android:id="@+id/list_image"
+		android:layout_width="60dp"
+		android:layout_height="60dp"
+		android:layout_gravity="center"
+		android:scaleType="fitCenter"
+		android:src="@drawable/mug1"/>
 
-	<TextView
-		android:id="@+id/price"
+	<RelativeLayout
+		android:id="@+id/item"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:fontFamily="sans-serif"
-		android:textAppearance="?android:textAppearanceSmall"
-		android:textColor="#AEB6BD"  />
+		android:layout_marginStart="@dimen/padding_small">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:padding="@dimen/padding_small">
+
+			<TextView
+				android:id="@+id/list_name"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:fontFamily="sans-serif-medium"
+				android:textAppearance="?android:textAppearanceMedium"
+				android:textColor="#2B3D4D"
+				android:text="Coffee mug"/>
+
+			<TextView
+				android:id="@+id/list_price"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:fontFamily="sans-serif"
+				android:textAppearance="?android:textAppearanceSmall"
+				android:textColor="#4e575e"
+				android:text="25.99"/>
+
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/list_quantity"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:textAppearanceSmall"
+			android:layout_centerVertical="true"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="80dp"
+			android:text="(36)"/>
+
+		<Button
+			android:id="@+id/sale_btn"
+			android:layout_width="70dp"
+			android:layout_height="50dp"
+			android:layout_centerVertical="true"
+			android:layout_alignParentEnd="true"
+			android:text="Sale"/>
+
+	</RelativeLayout>
+
 </LinearLayout>

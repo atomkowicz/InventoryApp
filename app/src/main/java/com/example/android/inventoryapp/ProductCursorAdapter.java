@@ -2,18 +2,30 @@ package com.example.android.inventoryapp;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.text.TextUtils;
+import android.net.Uri;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
 
+import java.text.DecimalFormat;
+import java.util.Locale;
+
 
 public class ProductCursorAdapter extends CursorAdapter {
-    public ProductCursorAdapter(Context context, Cursor c) {
+
+    private CatalogActivity catalogActivity = new CatalogActivity();
+    private long id;
+
+    public ProductCursorAdapter(CatalogActivity context, Cursor c) {
         super(context, c, 0);
+        this.catalogActivity = context;
     }
 
     @Override
@@ -24,16 +36,38 @@ public class ProductCursorAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 
-        TextView nameTextView = (TextView) view.findViewById(R.id.name);
-        TextView priceTextView = (TextView) view.findViewById(R.id.price);
+        TextView nameTextView = (TextView) view.findViewById(R.id.list_name);
+        TextView priceTextView = (TextView) view.findViewById(R.id.list_price);
+        TextView quantityTextView = (TextView) view.findViewById(R.id.list_quantity);
+        ImageView productImageView = (ImageView) view.findViewById(R.id.list_image);
+        Button saleButton = (Button) view.findViewById(R.id.sale_btn);
 
+        id = cursor.getLong(cursor.getColumnIndex(ProductEntry._ID));
         String name = cursor.getString(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_NAME));
-        String price = cursor.getString(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_PRICE));
+        int price = cursor.getInt(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_PRICE));
+        final int quantity = cursor.getInt(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_QUANTITY));
+        String image = cursor.getString(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_PICTURE));
 
-        if (TextUtils.isEmpty(price)) {
-            price = context.getString(R.string.unknown_price);
-        }
         nameTextView.setText(name);
-        priceTextView.setText(String.valueOf(price));
+        quantityTextView.setText(String.valueOf(quantity));
+        productImageView.setImageURI(Uri.parse(image));
+
+        double properPrice = price * 0.01;
+        String formattedPrice = new DecimalFormat("##,##0.00€").format(properPrice);
+        priceTextView.setText(formattedPrice);
+
+        saleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                catalogActivity.onSaleBtnClick(id, quantity);
+            }
+        });
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                catalogActivity.onListItemClick(id);
+            }
+        });
     }
 }

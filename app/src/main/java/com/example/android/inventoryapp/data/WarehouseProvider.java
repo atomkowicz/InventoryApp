@@ -115,10 +115,56 @@ public class WarehouseProvider extends ContentProvider {
         return rowsDeleted;
     }
 
+
+
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
                       @Nullable String[] selectionArgs) {
-        return 0;
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PRODUCTS:
+                return updateProduct(uri, values, selection, selectionArgs);
+            case PRODUCT_ID:
+                selection = ProductEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updateProduct(uri, values, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    private int updateProduct(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        // If there are no values to update, then don't try to update the database
+        if (values.size() == 0) {
+            return 0;
+        }
+
+        if (values.containsKey("name")) {
+            String name = values.getAsString(ProductEntry.COLUMN_PRODUCT_NAME);
+            if (name == null) {
+                throw new IllegalArgumentException("Product requires a name");
+            }
+        }
+
+        Integer quantity = values.getAsInteger(ProductEntry.COLUMN_PRODUCT_QUANTITY);
+        if (quantity == null || quantity < 0) {
+            throw new IllegalArgumentException("Product requires valid quantity");
+        }
+
+        Integer price = values.getAsInteger(ProductEntry.COLUMN_PRODUCT_PRICE);
+        if (price != null && price < 0) {
+            throw new IllegalArgumentException("Pet requires valid weight");
+        }
+
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
+        int rowsUpdated = database.update(ProductEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsUpdated;
     }
 
     private Uri insertProduct(Uri uri, ContentValues values) {

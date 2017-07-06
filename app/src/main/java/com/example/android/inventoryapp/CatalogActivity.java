@@ -1,9 +1,7 @@
 package com.example.android.inventoryapp;
 
-import android.content.ContentValues;
-import android.content.CursorLoader;
-import android.content.Intent;
-import android.content.Loader;
+import android.app.LoaderManager;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,13 +9,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
+import com.example.android.inventoryapp.data.WarehouseContract;
 import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
-import android.app.LoaderManager;
-
 
 import static com.example.android.inventoryapp.data.WarehouseProvider.LOG_TAG;
 
@@ -30,7 +29,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_catalog);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -43,19 +42,29 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         });
 
         // Find the ListView which will be populated with the pet data
-        ListView petListView = (ListView) findViewById(R.id.list);
+        ListView productListView = (ListView) findViewById(R.id.list);
 
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
-        petListView.setEmptyView(emptyView);
+        productListView.setEmptyView(emptyView);
 
         // Create empty adapter
         adapter = new ProductCursorAdapter(this, null);
-        petListView.setAdapter(adapter);
+        productListView.setAdapter(adapter);
 
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(PRODUCT_LOADER, null, this);
+
+        productListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> pAdapterView, View pView, int position, long id) {
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+                Uri currentProductUri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI_PRODUCTS, id);
+                intent.setData(currentProductUri);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -84,12 +93,45 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         return super.onOptionsItemSelected(item);
     }
 
+    public void onListItemClick(long id) {
+        Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+
+        Uri currentProductUri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI_PRODUCTS, id);
+        intent.setData(currentProductUri);
+
+        startActivity(intent);
+    }
+
+    public void onSaleBtnClick(long id, int quantity) {
+        Uri currentProductUri = ContentUris.withAppendedId(ProductEntry.CONTENT_URI_PRODUCTS, id);
+
+        int newQuantity = quantity > 0 ? quantity - 1 : 0;
+
+        ContentValues values = new ContentValues();
+        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, newQuantity);
+
+        int rowsAffected = getContentResolver().update(currentProductUri, values, null, null);
+        if (rowsAffected == 0) {
+            // If no rows were affected, then there was an error with the update.
+            Toast.makeText(this, getString(R.string.catalog_update_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else if (quantity != newQuantity) {
+            // Otherwise, the update was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.catalog_update_successful),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void insertProduct() {
         ContentValues values = new ContentValues();
-        values.put(ProductEntry.COLUMN_PRODUCT_NAME, "Summer Dress");
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, 4900);
+        values.put(ProductEntry.COLUMN_PRODUCT_NAME, "Coffee cup");
+        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, 2900);
         values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, 2);
-        values.put(ProductEntry.COLUMN_PRODUCT_PICTURE, "some pic");
+
+        Uri imgUri = Uri.parse("android.resource://" + WarehouseContract.CONTENT_AUTHORITY + "/" + R.drawable.mug1);
+        Log.v(LOG_TAG, imgUri.toString());
+
+        values.put(ProductEntry.COLUMN_PRODUCT_PICTURE, imgUri.toString());
 
         Uri newUri = getContentResolver().insert(ProductEntry.CONTENT_URI_PRODUCTS, values);
         Log.v(LOG_TAG, newUri.toString());
