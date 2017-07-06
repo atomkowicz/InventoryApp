@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -86,7 +87,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete_all_entries) {
-            deleteAllProducts();
+            showDeleteConfirmationDialog();
             return true;
         }
 
@@ -117,7 +118,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                     Toast.LENGTH_SHORT).show();
         } else if (quantity != newQuantity) {
             // Otherwise, the update was successful and we can display a toast.
-            Toast.makeText(this, getString(R.string.catalog_update_successful),
+            Toast.makeText(this, getString(R.string.catalog_update_successful) + id,
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -125,7 +126,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     private void insertProduct() {
         ContentValues values = new ContentValues();
         values.put(ProductEntry.COLUMN_PRODUCT_NAME, "Coffee cup");
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, 2900);
+        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, "22.99");
         values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, 2);
 
         Uri imgUri = Uri.parse("android.resource://" + WarehouseContract.CONTENT_AUTHORITY + "/" + R.drawable.mug1);
@@ -140,6 +141,32 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     private void deleteAllProducts() {
         int rowsDeleted = getContentResolver().delete(ProductEntry.CONTENT_URI_PRODUCTS, null, null);
         Log.v("CatalogActivity", rowsDeleted + " rows deleted from products database");
+    }
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the product.
+                deleteAllProducts();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the product.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     @Override

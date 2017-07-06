@@ -3,10 +3,7 @@ package com.example.android.inventoryapp;
 import android.Manifest;
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.ContentValues;
-import android.content.CursorLoader;
-import android.content.Intent;
-import android.content.Loader;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -29,8 +27,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
-
-import java.text.NumberFormat;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -113,37 +109,45 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveProduct();
-                finish();
+                boolean productSaved = saveProduct();
+                if (productSaved) finish();
             }
         });
     }
 
-    private void saveProduct() {
+    private boolean saveProduct() {
         String name = nameEditText.getText().toString().trim();
-        // replace all nondigit from string input, this will also remove white spaces
-        String priceString = priceEditText.getText().toString().replaceAll("\\D", "");
+        String price = priceEditText.getText().toString().trim();
         quantityString = quantityEditText.getText().toString().trim();
 
-
-        int price = !TextUtils.isEmpty(priceString) ? Integer.parseInt(priceString) : 0;
-        int quantity = !TextUtils.isEmpty(quantityString) ? Integer.parseInt(quantityString) : 0;
-        String image = imageUri != null ? imageUri.toString() :
-                "android.resource://com.example.android.inventoryapp/2130837600";
-
+        if (currentProductUri == null && TextUtils.isEmpty(name)) {
+            Toast.makeText(this, getString(R.string.editor_required_name), Toast.LENGTH_SHORT).show();
+            return false;
+        }
         ContentValues values = new ContentValues();
         values.put(ProductEntry.COLUMN_PRODUCT_NAME, name);
-        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, price);
-        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
-        values.put(ProductEntry.COLUMN_PRODUCT_PICTURE, image);
 
-        if (currentProductUri == null && TextUtils.isEmpty(name)) {
-            return;
+        int quantity = !TextUtils.isEmpty(quantityString) ? Integer.parseInt(quantityString) : 0;
+        values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
+
+        if (currentProductUri == null && TextUtils.isEmpty(price)) {
+            Toast.makeText(this, getString(R.string.editor_required_price), Toast.LENGTH_SHORT).show();
+            return false;
         }
+
+        values.put(ProductEntry.COLUMN_PRODUCT_PRICE, price);
+
+        if (currentProductUri == null && imageUri == null) {
+            Toast.makeText(this, getString(R.string.editor_required_photo), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        String image = imageUri.toString();
+        values.put(ProductEntry.COLUMN_PRODUCT_PICTURE, image);
 
         if (currentProductUri == null) {
             setTitle("Add Product");
-            invalidateOptionsMenu();
+            supportInvalidateOptionsMenu();
             Uri newUri = getContentResolver().insert(ProductEntry.CONTENT_URI_PRODUCTS, values);
 
             // Show a toast message depending on whether or not the insertion was successful
@@ -151,10 +155,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 // If the new content URI is null, then there was an error with insertion.
                 Toast.makeText(this, getString(R.string.editor_insert_failed),
                         Toast.LENGTH_SHORT).show();
+                return false;
             } else {
                 // Otherwise, the insertion was successful and we can display a toast.
                 Toast.makeText(this, getString(R.string.editor_insert_new_successful),
                         Toast.LENGTH_SHORT).show();
+                return true;
             }
         } else {
             // Prepare the loader.  Either re-connect with an existing one,
@@ -164,10 +170,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 // If no rows were affected, then there was an error with the update.
                 Toast.makeText(this, getString(R.string.editor_insert_failed),
                         Toast.LENGTH_SHORT).show();
+                return false;
             } else {
                 // Otherwise, the update was successful and we can display a toast.
                 Toast.makeText(this, getString(R.string.editor_insert_new_successful),
                         Toast.LENGTH_SHORT).show();
+                return true;
             }
         }
     }
@@ -176,7 +184,57 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_editor, menu);
+        if (currentProductUri == null) {
+            MenuItem orderItem = menu.findItem(R.id.action_send_order);
+            orderItem.setVisible(false); // invalidateOptionsMenu() doesn't work
+
+            MenuItem deleteItem = menu.findItem(R.id.action_delete_product);
+            deleteItem.setVisible(false);
+        }
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!productHasChanged) {
+            super.onBackPressed();
+            return;
+        }
+        // Otherwise if there are unsaved changes, setup a dialog to warn the user.
+        // Create a click listener to handle the user confirming that changes should be discarded.
+        DialogInterface.OnClickListener discardButtonClickListener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // User clicked "Discard" button, close the current activity.
+                        finish();
+                    }
+                };
+
+        // Show dialog that there are unsaved changes
+        showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    private void showUnsavedChangesDialog(
+            DialogInterface.OnClickListener discardButtonClickListener) {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.unsaved_changes_dialog_msg);
+        builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+        builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Keep editing" button, so dismiss the dialog
+                // and continue editing the product.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -196,17 +254,45 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_send_order) {
-            sendOrderToSupplier();
+            if (currentProductUri != null) {
+                sendOrderToSupplier(nameEditText.getText().toString().trim());
+            }
             return true;
         }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete_product) {
-            deleteProduct();
+            showDeleteConfirmationDialog();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the product.
+                deleteProduct();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the product.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void deleteProduct() {
@@ -219,12 +305,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-    private void sendOrderToSupplier() {
+    private void sendOrderToSupplier(String product) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_EMAIL, "supplier@email.com");
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Ordering product:" + nameEditText.getText().toString().trim());
-        intent.putExtra(Intent.EXTRA_TEXT, "I'm email body.");
+        String subject = getString(R.string.editor_ordering_product) + product;
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        String messageBody = getString(R.string.editor_message_body) + product;
+        intent.putExtra(Intent.EXTRA_TEXT, messageBody);
 
         startActivity(Intent.createChooser(intent, "Send Email"));
     }
@@ -257,17 +344,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             // Extract out the value from the Cursor for the given column index
             String name = cursor.getString(nameColumnIndex);
-            int price = cursor.getInt(priceColumnIndex);
+            String price = cursor.getString(priceColumnIndex);
             int quantity = cursor.getInt(quantityColumnIndex);
             String picture = cursor.getString(pictureColumnIndex);
 
             // Update the views on the screen with the values from the database
             nameEditText.setText(name);
-
-            double properPrice = price * 0.01;
-            String formattedPrice = getFormatedPrice(properPrice);
-
-            priceEditText.setText(formattedPrice);
+            priceEditText.setText(price);
             quantityEditText.setText(Integer.toString(quantity));
             pictureImageView.setImageURI(Uri.parse(picture));
             imageUri = Uri.parse(picture);
@@ -279,12 +362,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // This is called when the last Cursor provided to onLoadFinished()
         // above is about to be closed.  We need to make sure we are no
         // longer using it.
-    }
-
-    public String getFormatedPrice(double price) {
-        NumberFormat format = NumberFormat.getInstance();
-        format.setMaximumFractionDigits(2);
-        return (format.format(price));
     }
 
     public void trySelector() {

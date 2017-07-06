@@ -21,7 +21,7 @@ import java.util.Locale;
 public class ProductCursorAdapter extends CursorAdapter {
 
     private CatalogActivity catalogActivity = new CatalogActivity();
-    private long id;
+
 
     public ProductCursorAdapter(CatalogActivity context, Cursor c) {
         super(context, c, 0);
@@ -42,24 +42,22 @@ public class ProductCursorAdapter extends CursorAdapter {
         ImageView productImageView = (ImageView) view.findViewById(R.id.list_image);
         Button saleButton = (Button) view.findViewById(R.id.sale_btn);
 
-        id = cursor.getLong(cursor.getColumnIndex(ProductEntry._ID));
+        final Long id = cursor.getLong(cursor.getColumnIndex(ProductEntry._ID));
         String name = cursor.getString(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_NAME));
-        int price = cursor.getInt(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_PRICE));
+        String price = cursor.getString(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_PRICE));
         final int quantity = cursor.getInt(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_QUANTITY));
         String image = cursor.getString(cursor.getColumnIndexOrThrow(ProductEntry.COLUMN_PRODUCT_PICTURE));
 
-        nameTextView.setText(name);
+        nameTextView.setText(name + Long.toString(id));
         quantityTextView.setText(String.valueOf(quantity));
         productImageView.setImageURI(Uri.parse(image));
-
-        double properPrice = price * 0.01;
-        String formattedPrice = new DecimalFormat("##,##0.00€").format(properPrice);
-        priceTextView.setText(formattedPrice);
+        priceTextView.setText(price + " EUR");
 
         saleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 catalogActivity.onSaleBtnClick(id, quantity);
+                notifyDataSetChanged();
             }
         });
 
@@ -70,4 +68,6 @@ public class ProductCursorAdapter extends CursorAdapter {
             }
         });
     }
+
+
 }

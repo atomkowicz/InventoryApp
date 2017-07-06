@@ -30,6 +30,12 @@
 	<string name="catalog_update_successful">Product updated</string>
 	<string name="catalog_update_failed">Error when updating product</string>
 
+	<string name="editor_required_name">Name is required</string>
+	<string name="editor_required_price">Price is required</string>
+	<string name="editor_required_photo">Photo is required</string>
+	<string name="editor_ordering_product">Ordering product: </string>
+	<string name="editor_message_body">Hello, can you send me product: </string>
+
 	<!-- dialogs -->
 	<string name="empty_view_title_text">Warehouse is currently empty</string>
 	<string name="empty_view_subtitle_text">Get started by adding a new product</string>
