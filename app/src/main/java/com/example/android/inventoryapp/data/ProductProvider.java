@@ -10,14 +10,14 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
+import com.example.android.inventoryapp.data.ProductContract.ProductEntry;
 
-import static com.example.android.inventoryapp.data.WarehouseContract.CONTENT_AUTHORITY;
-import static com.example.android.inventoryapp.data.WarehouseContract.PATH_PRODUCTS;
+import static com.example.android.inventoryapp.data.ProductContract.CONTENT_AUTHORITY;
+import static com.example.android.inventoryapp.data.ProductContract.PATH_PRODUCTS;
 
-public class WarehouseProvider extends ContentProvider {
-    public static final String LOG_TAG = WarehouseProvider.class.getSimpleName();
-    public WarehouseDbHelper dbHelper;
+public class ProductProvider extends ContentProvider {
+    public static final String LOG_TAG = ProductProvider.class.getSimpleName();
+    public ProductDbHelper dbHelper;
     private static final int PRODUCTS = 100;
     private static final int PRODUCT_ID = 101;
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -29,7 +29,7 @@ public class WarehouseProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        dbHelper = new WarehouseDbHelper(getContext());
+        dbHelper = new ProductDbHelper(getContext());
         return true;
     }
 

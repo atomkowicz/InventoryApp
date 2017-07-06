@@ -4,21 +4,20 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
-import com.example.android.inventoryapp.data.WarehouseContract.SupplierEntry;
+import com.example.android.inventoryapp.data.ProductContract.ProductEntry;
 
-import static com.example.android.inventoryapp.data.WarehouseProvider.LOG_TAG;
+import static com.example.android.inventoryapp.data.ProductProvider.LOG_TAG;
 
 /**
  * Database helper class
  */
 
-public class WarehouseDbHelper extends SQLiteOpenHelper {
+public class ProductDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "warehouse.db";
     private static final int DATABASE_VERSION = 1;
 
-    public WarehouseDbHelper(Context context) {
+    public ProductDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -29,13 +28,6 @@ public class WarehouseDbHelper extends SQLiteOpenHelper {
             ProductEntry.COLUMN_PRODUCT_PRICE + " STRING NOT NULL," +
             ProductEntry.COLUMN_PRODUCT_QUANTITY + " INTEGER DEFAULT 0," +
             ProductEntry.COLUMN_PRODUCT_PICTURE + " TEXT" +
-            ");" +
-
-            "CREATE TABLE " + SupplierEntry.TABLE_NAME +
-            "(" +
-            SupplierEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            SupplierEntry.COLUMN_SUPPLIER_NAME + " TEXT NOT NULL, " +
-            SupplierEntry.COLUMN_SUPPLIER_EMAIL + " TEXT NOT NULL" +
             ");";
 
     @Override
@@ -46,8 +38,7 @@ public class WarehouseDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String SQL_DROP_TABLES = "DROP TABLE " + ProductEntry.TABLE_NAME + ";" +
-                "DROP TABLE " + SupplierEntry.TABLE_NAME + ";";
+        String SQL_DROP_TABLES = "DROP TABLE " + ProductEntry.TABLE_NAME + ";";
 
         db.execSQL(SQL_DROP_TABLES);
         db.execSQL(SQL_CREATE_ENTRIES);

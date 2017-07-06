@@ -16,10 +16,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.example.android.inventoryapp.data.WarehouseContract;
-import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
+import com.example.android.inventoryapp.data.ProductContract;
+import com.example.android.inventoryapp.data.ProductContract.ProductEntry;
 
-import static com.example.android.inventoryapp.data.WarehouseProvider.LOG_TAG;
+import static com.example.android.inventoryapp.data.ProductProvider.LOG_TAG;
 
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -129,7 +129,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         values.put(ProductEntry.COLUMN_PRODUCT_PRICE, "22.99");
         values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, 2);
 
-        Uri imgUri = Uri.parse("android.resource://" + WarehouseContract.CONTENT_AUTHORITY + "/" + R.drawable.mug1);
+        Uri imgUri = Uri.parse("android.resource://" + ProductContract.CONTENT_AUTHORITY + "/" + R.drawable.mug1);
         Log.v(LOG_TAG, imgUri.toString());
 
         values.put(ProductEntry.COLUMN_PRODUCT_PICTURE, imgUri.toString());

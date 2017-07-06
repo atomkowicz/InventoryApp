@@ -31,7 +31,7 @@
 				android:value=".CatalogActivity" />
 		</activity>
 		<provider
-			android:name=".data.WarehouseProvider"
+			android:name=".data.ProductProvider"
 			android:authorities="com.example.android.inventoryapp"
 			android:exported="false" />
 	</application>

@@ -26,7 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-import com.example.android.inventoryapp.data.WarehouseContract.ProductEntry;
+import com.example.android.inventoryapp.data.ProductContract.ProductEntry;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -120,7 +120,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String price = priceEditText.getText().toString().trim();
         quantityString = quantityEditText.getText().toString().trim();
 
-        if (currentProductUri == null && TextUtils.isEmpty(name)) {
+        if (TextUtils.isEmpty(name)) {
             Toast.makeText(this, getString(R.string.editor_required_name), Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -130,14 +130,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         int quantity = !TextUtils.isEmpty(quantityString) ? Integer.parseInt(quantityString) : 0;
         values.put(ProductEntry.COLUMN_PRODUCT_QUANTITY, quantity);
 
-        if (currentProductUri == null && TextUtils.isEmpty(price)) {
+        if (TextUtils.isEmpty(price)) {
             Toast.makeText(this, getString(R.string.editor_required_price), Toast.LENGTH_SHORT).show();
             return false;
         }
 
         values.put(ProductEntry.COLUMN_PRODUCT_PRICE, price);
 
-        if (currentProductUri == null && imageUri == null) {
+        if (imageUri == null) {
             Toast.makeText(this, getString(R.string.editor_required_photo), Toast.LENGTH_SHORT).show();
             return false;
         }
