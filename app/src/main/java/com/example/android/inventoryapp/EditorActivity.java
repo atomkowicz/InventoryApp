@@ -67,6 +67,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         nameEditText.setOnTouchListener(mTouchListener);
         priceEditText.setOnTouchListener(mTouchListener);
+        //EditText text = new EditText(this); text.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
         quantityEditText.setOnTouchListener(mTouchListener);
         pictureImageView.setOnTouchListener(mTouchListener);
 
