@@ -38,9 +38,10 @@ public class ProductDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String SQL_DROP_TABLES = "DROP TABLE " + ProductEntry.TABLE_NAME + ";";
-
-        db.execSQL(SQL_DROP_TABLES);
-        db.execSQL(SQL_CREATE_ENTRIES);
+        //TODO: backup user data before upgrade and inert it afer sucessfully createing new empty tables
+       
+        //String SQL_DROP_TABLES = "DROP TABLE " + ProductEntry.TABLE_NAME + ";";
+        //db.execSQL(SQL_DROP_TABLES);
+        //db.execSQL(SQL_CREATE_ENTRIES);
     }
 }
